@@ -649,6 +649,24 @@ function AdminPage({ polaroids, envelopes, setPolaroids, setEnvelopes, lockImage
     );
   }
 
+  function addEnvelope() {
+    const envelopeStyles = ['rose', 'sky', 'mint', 'peach', 'violet', 'lemon', 'coral', 'indigo', 'cream', 'charcoal'];
+    const styleIndex = envelopes.length % envelopeStyles.length;
+    const newEnvelope = {
+      id: 'letter-' + crypto.randomUUID().slice(0, 8),
+      title: 'Letter ' + (envelopes.length + 1),
+      message: '',
+      style: envelopeStyles[styleIndex],
+      unlockDate: '',
+      image: '',
+    };
+    saveEnvelopes([...envelopes, newEnvelope]);
+  }
+
+  function removeEnvelope(envelopeId) {
+    saveEnvelopes(envelopes.filter((envelope) => envelope.id !== envelopeId));
+  }
+
   function resetEnvelopes() {
     localStorage.removeItem(ENVELOPE_STORAGE_KEY);
     setEnvelopes(defaultEnvelopes);
@@ -787,9 +805,14 @@ function AdminPage({ polaroids, envelopes, setPolaroids, setEnvelopes, lockImage
               <h2 id="envelope-admin-title">Envelope Messages</h2>
               <p>Type the title and message that should appear inside each envelope.</p>
             </div>
-            <button type="button" className="reset-button" onClick={resetEnvelopes}>
-              Reset Letters
-            </button>
+            <div className="admin-section-heading-actions">
+              <button type="button" className="add-envelope-button" onClick={addEnvelope}>
+                + Add New Letter
+              </button>
+              <button type="button" className="reset-button" onClick={resetEnvelopes}>
+                Reset Letters
+              </button>
+            </div>
           </div>
 
           <div className="admin-envelope-list">
@@ -866,6 +889,33 @@ function AdminPage({ polaroids, envelopes, setPolaroids, setEnvelopes, lockImage
                         </label>
                       )}
                     </div>
+                  </div>
+                  <div className="admin-envelope-card-actions">
+                    <label className="admin-envelope-style-picker">
+                      Style
+                      <select
+                        value={envelope.style || 'rose'}
+                        onChange={(event) => updateEnvelope(envelope.id, 'style', event.target.value)}
+                      >
+                        <option value="rose">Rose</option>
+                        <option value="sky">Sky</option>
+                        <option value="mint">Mint</option>
+                        <option value="peach">Peach</option>
+                        <option value="violet">Violet</option>
+                        <option value="lemon">Lemon</option>
+                        <option value="coral">Coral</option>
+                        <option value="indigo">Indigo</option>
+                        <option value="cream">Cream</option>
+                        <option value="charcoal">Charcoal</option>
+                      </select>
+                    </label>
+                    <button
+                      type="button"
+                      className="delete-envelope-btn"
+                      onClick={() => removeEnvelope(envelope.id)}
+                    >
+                      🗑 Delete Letter
+                    </button>
                   </div>
                 </div>
               </article>
