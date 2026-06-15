@@ -1,0 +1,116 @@
+{
+  "polaroids": [
+    {
+      "id": "default-fire",
+      "src": "/Pics/3d-fire-with-flames.jpg",
+      "caption": "First memory"
+    },
+    {
+      "id": "default-chatgpt",
+      "src": "/Pics/ChatGPT%20Image%20Nov%2020%2C%202025%2C%2010_00_01%20AM.png",
+      "caption": "A little moment"
+    },
+    {
+      "id": "default-gemini-one",
+      "src": "/Pics/Gemini_Generated_Image_1wd3wc1wd3wc1wd3.png",
+      "caption": "Another chapter"
+    },
+    {
+      "id": "default-gemini-two",
+      "src": "/Pics/Gemini_Generated_Image_qi9xn0qi9xn0qi9x.png",
+      "caption": "A favorite day"
+    },
+    {
+      "id": "default-gemini-three",
+      "src": "/Pics/Gemini_Generated_Image_xm4fnaxm4fnaxm4f.png",
+      "caption": "One more smile"
+    },
+    {
+      "id": "default-kadhakali",
+      "src": "/Pics/KadhakaliREF.png",
+      "caption": "To be continued"
+    }
+  ],
+  "envelopes": [
+    {
+      "id": "letter-one",
+      "title": "Letter 1",
+      "message": "Write the first tiny secret here.",
+      "style": "rose",
+      "unlockDate": "",
+      "image": ""
+    },
+    {
+      "id": "letter-two",
+      "title": "Letter 2",
+      "message": "Write a memory from the start of your story.",
+      "style": "sky",
+      "unlockDate": "",
+      "image": ""
+    },
+    {
+      "id": "letter-three",
+      "title": "Letter 3",
+      "message": "Write something she does that always makes you smile.",
+      "style": "mint",
+      "unlockDate": "",
+      "image": ""
+    },
+    {
+      "id": "letter-four",
+      "title": "Letter 4",
+      "message": "Write a favorite inside joke.",
+      "style": "peach",
+      "unlockDate": "",
+      "image": ""
+    },
+    {
+      "id": "letter-five",
+      "title": "Letter 5",
+      "message": "Write one thing you want to do together.",
+      "style": "violet",
+      "unlockDate": "",
+      "image": ""
+    },
+    {
+      "id": "letter-six",
+      "title": "Letter 6",
+      "message": "Write about a moment you still replay in your head.",
+      "style": "lemon",
+      "unlockDate": "",
+      "image": ""
+    },
+    {
+      "id": "letter-seven",
+      "title": "Letter 7",
+      "message": "Write a promise.",
+      "style": "coral",
+      "unlockDate": "",
+      "image": ""
+    },
+    {
+      "id": "letter-eight",
+      "title": "Letter 8",
+      "message": "Write something you are grateful for.",
+      "style": "indigo",
+      "unlockDate": "",
+      "image": ""
+    },
+    {
+      "id": "letter-nine",
+      "title": "Letter 9",
+      "message": "Write a line that only she will understand.",
+      "style": "cream",
+      "unlockDate": "",
+      "image": ""
+    },
+    {
+      "id": "letter-ten",
+      "title": "Letter 10",
+      "message": "Write the ending that feels like a beginning.",
+      "style": "charcoal",
+      "unlockDate": "",
+      "image": ""
+    }
+  ]
+}
