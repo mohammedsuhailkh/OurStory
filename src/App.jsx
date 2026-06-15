@@ -14,32 +14,32 @@ const ENVELOPE_STORAGE_KEY = 'story-envelopes';
 const defaultPolaroids = [
   {
     id: 'default-fire',
-    src: '/Pics/3d-fire-with-flames.jpg',
+    src: import.meta.env.BASE_URL + 'Pics/3d-fire-with-flames.jpg',
     caption: 'First memory',
   },
   {
     id: 'default-chatgpt',
-    src: '/Pics/ChatGPT%20Image%20Nov%2020%2C%202025%2C%2010_00_01%20AM.png',
+    src: import.meta.env.BASE_URL + 'Pics/ChatGPT%20Image%20Nov%2020%2C%202025%2C%2010_00_01%20AM.png',
     caption: 'A little moment',
   },
   {
     id: 'default-gemini-one',
-    src: '/Pics/Gemini_Generated_Image_1wd3wc1wd3wc1wd3.png',
+    src: import.meta.env.BASE_URL + 'Pics/Gemini_Generated_Image_1wd3wc1wd3wc1wd3.png',
     caption: 'Another chapter',
   },
   {
     id: 'default-gemini-two',
-    src: '/Pics/Gemini_Generated_Image_qi9xn0qi9xn0qi9x.png',
+    src: import.meta.env.BASE_URL + 'Pics/Gemini_Generated_Image_qi9xn0qi9xn0qi9x.png',
     caption: 'A favorite day',
   },
   {
     id: 'default-gemini-three',
-    src: '/Pics/Gemini_Generated_Image_xm4fnaxm4fnaxm4f.png',
+    src: import.meta.env.BASE_URL + 'Pics/Gemini_Generated_Image_xm4fnaxm4fnaxm4f.png',
     caption: 'One more smile',
   },
   {
     id: 'default-kadhakali',
-    src: '/Pics/KadhakaliREF.png',
+    src: import.meta.env.BASE_URL + 'Pics/KadhakaliREF.png',
     caption: 'To be continued',
   },
 ];
@@ -262,7 +262,7 @@ function LockScreen({ onUnlock, isUnlocking }) {
       <div className="lock-content">
         <img
           className="lock-placeholder-image"
-          src="/lock-placeholder.png"
+          src={import.meta.env.BASE_URL + 'lock-placeholder.png'}
           alt=""
           aria-hidden="true"
         />
@@ -813,7 +813,7 @@ export default function App() {
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [syncStatus, setSyncStatus] = useState(''); // '', 'syncing', 'success', 'error'
   const [syncError, setSyncError] = useState('');
-  const isAdminPage = window.location.pathname === '/secretadmin';
+  const isAdminPage = window.location.pathname.endsWith('/secretadmin') || window.location.search.includes('page=secretadmin');
 
   const getFirebaseUrl = () => {
     if (!FIREBASE_DB_URL) return '';
@@ -843,7 +843,7 @@ export default function App() {
             setIsLoading(false);
           } else {
             // Seed new empty database from public/story-config.json
-            fetch('/story-config.json')
+            fetch(import.meta.env.BASE_URL + 'story-config.json')
               .then((res) => res.json())
               .then((configData) => {
                 const initPolaroids = configData.polaroids && configData.polaroids.length > 0 ? configData.polaroids : defaultPolaroids;
@@ -889,7 +889,7 @@ export default function App() {
     }
 
     function loadFromLocalFiles() {
-      fetch('/story-config.json')
+      fetch(import.meta.env.BASE_URL + 'story-config.json')
         .then((res) => {
           if (!res.ok) throw new Error('No config found');
           return res.json();
