@@ -10,6 +10,7 @@ const FIREBASE_DB_URL = 'https://ourstory-ab025-default-rtdb.firebaseio.com/';
 const PASSKEY = '1215';
 const POLAROID_STORAGE_KEY = 'story-polaroids';
 const ENVELOPE_STORAGE_KEY = 'story-envelopes';
+const LOCK_IMAGE_STORAGE_KEY = 'story-lock-image';
 
 const defaultPolaroids = [
   {
@@ -264,7 +265,7 @@ function UnlockBurst() {
   );
 }
 
-function LockScreen({ onUnlock, isUnlocking }) {
+function LockScreen({ onUnlock, isUnlocking, lockImage }) {
   const [passkey, setPasskey] = useState('');
   const [error, setError] = useState('');
   const [wrongFlash, setWrongFlash] = useState(false);
@@ -295,7 +296,7 @@ function LockScreen({ onUnlock, isUnlocking }) {
       <div className="lock-content">
         <img
           className="lock-placeholder-image"
-          src={import.meta.env.BASE_URL + 'lock-placeholder.png'}
+          src={lockImage || (import.meta.env.BASE_URL + 'lock-placeholder.png')}
           alt=""
           aria-hidden="true"
         />
@@ -531,13 +532,13 @@ function LetterSection({ envelopes }) {
   );
 }
 
-function AdminPage({ polaroids, envelopes, setPolaroids, setEnvelopes, syncStatus, syncError, onSync, isFirebaseConfigured }) {
+function AdminPage({ polaroids, envelopes, setPolaroids, setEnvelopes, lockImage, setLockImage, syncStatus, syncError, onSync, isFirebaseConfigured }) {
   const [isAdminUnlocked, setIsAdminUnlocked] = useState(false);
   const [passkey, setPasskey] = useState('');
   const [error, setError] = useState('');
 
   function exportConfiguration() {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ polaroids, envelopes }, null, 2));
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ lockImage, polaroids, envelopes }, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
     downloadAnchor.setAttribute("download", "story-config.json");
@@ -559,6 +560,19 @@ function AdminPage({ polaroids, envelopes, setPolaroids, setEnvelopes, syncStatu
     setEnvelopes(nextEnvelopes);
     try {
       localStorage.setItem(ENVELOPE_STORAGE_KEY, JSON.stringify(nextEnvelopes));
+    } catch (e) {
+      console.warn('LocalStorage save failed due to quota limit, local state is updated:', e);
+    }
+  }
+
+  function saveLockImage(nextLockImage) {
+    setLockImage(nextLockImage);
+    try {
+      if (nextLockImage) {
+        localStorage.setItem(LOCK_IMAGE_STORAGE_KEY, nextLockImage);
+      } else {
+        localStorage.removeItem(LOCK_IMAGE_STORAGE_KEY);
+      }
     } catch (e) {
       console.warn('LocalStorage save failed due to quota limit, local state is updated:', e);
     }
@@ -676,7 +690,7 @@ function AdminPage({ polaroids, envelopes, setPolaroids, setEnvelopes, syncStatu
                 type="button"
                 className={`admin-sync-button ${syncStatus}`}
                 disabled={syncStatus === 'syncing'}
-                onClick={() => onSync(polaroids, envelopes)}
+                onClick={() => onSync(polaroids, envelopes, lockImage)}
               >
                 {syncStatus === 'syncing' ? '🔄 Syncing...' :
                  syncStatus === 'success' ? '✅ Synced to Cloud!' :
@@ -714,6 +728,58 @@ function AdminPage({ polaroids, envelopes, setPolaroids, setEnvelopes, syncStatu
             ⚠️ Sync Error: {syncError || 'Could not save to Firebase. Check your console log or database rules.'}
           </div>
         )}
+
+        <section className="admin-lock-image-editor" aria-labelledby="lock-image-admin-title">
+          <div className="admin-section-heading">
+            <div>
+              <h2 id="lock-image-admin-title">Lock Screen Customization</h2>
+              <p>Upload a custom image to display on the lock screen instead of the default placeholder.</p>
+            </div>
+            {lockImage && (
+              <button type="button" className="reset-button" onClick={() => saveLockImage('')}>
+                Reset to Default
+              </button>
+            )}
+          </div>
+
+          <div className="admin-lock-image-upload-area">
+            {lockImage ? (
+              <div className="admin-lock-image-preview">
+                <img src={lockImage} alt="Lock screen custom preview" />
+                <button
+                  type="button"
+                  className="remove-lock-image-btn"
+                  onClick={() => saveLockImage('')}
+                >
+                  Remove Lock Screen Image
+                </button>
+              </div>
+            ) : (
+              <label className="upload-box">
+                <span>Upload Lock Screen Image</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (!file) return;
+                    if (!file.type.startsWith('image/')) {
+                      alert('Please upload an image file');
+                      return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      compressImage(reader.result).then((compressedResult) => {
+                        saveLockImage(compressedResult);
+                      });
+                    };
+                    reader.readAsDataURL(file);
+                  }}
+                />
+              </label>
+            )}
+          </div>
+        </section>
 
         <section className="admin-envelope-editor" aria-labelledby="envelope-admin-title">
           <div className="admin-section-heading">
@@ -853,6 +919,7 @@ function AdminPage({ polaroids, envelopes, setPolaroids, setEnvelopes, syncStatu
 export default function App() {
   const [polaroids, setPolaroids] = useState([]);
   const [envelopes, setEnvelopes] = useState([]);
+  const [lockImage, setLockImage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [isUnlocking, setIsUnlocking] = useState(false);
@@ -881,10 +948,11 @@ export default function App() {
           return res.json();
         })
         .then((data) => {
-          if (data && (data.polaroids || data.envelopes)) {
+          if (data && (data.polaroids || data.envelopes || data.lockImage)) {
             // Load custom config from Firebase
             setPolaroids(data.polaroids || []);
             setEnvelopes(data.envelopes || []);
+            setLockImage(data.lockImage || '');
             setIsLoading(false);
           } else {
             // Seed new empty database from public/story-config.json
@@ -893,21 +961,24 @@ export default function App() {
               .then((configData) => {
                 const initPolaroids = configData.polaroids && configData.polaroids.length > 0 ? configData.polaroids : defaultPolaroids;
                 const initEnvelopes = configData.envelopes && configData.envelopes.length > 0 ? configData.envelopes : defaultEnvelopes;
+                const initLockImage = configData.lockImage || '';
                 
                 fetch(dbUrl, {
                   method: 'PUT',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ polaroids: initPolaroids, envelopes: initEnvelopes })
+                  body: JSON.stringify({ polaroids: initPolaroids, envelopes: initEnvelopes, lockImage: initLockImage })
                 })
                 .then(() => {
                   setPolaroids(initPolaroids);
                   setEnvelopes(initEnvelopes);
+                  setLockImage(initLockImage);
                   setIsLoading(false);
                 })
                 .catch((e) => {
                   console.error('Failed to seed Firebase:', e);
                   setPolaroids(initPolaroids);
                   setEnvelopes(initEnvelopes);
+                  setLockImage(initLockImage);
                   setIsLoading(false);
                 });
               })
@@ -916,10 +987,11 @@ export default function App() {
                 fetch(dbUrl, {
                   method: 'PUT',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ polaroids: defaultPolaroids, envelopes: defaultEnvelopes })
+                  body: JSON.stringify({ polaroids: defaultPolaroids, envelopes: defaultEnvelopes, lockImage: '' })
                 }).then(() => {
                   setPolaroids(defaultPolaroids);
                   setEnvelopes(defaultEnvelopes);
+                  setLockImage('');
                   setIsLoading(false);
                 });
               });
@@ -942,29 +1014,35 @@ export default function App() {
         .then((data) => {
           const localEnvelopes = localStorage.getItem(ENVELOPE_STORAGE_KEY);
           const localPolaroids = localStorage.getItem(POLAROID_STORAGE_KEY);
+          const localLockImage = localStorage.getItem(LOCK_IMAGE_STORAGE_KEY);
 
           const defaultNormalizedPolaroids = data.polaroids && data.polaroids.length > 0 ? data.polaroids : defaultPolaroids;
           const defaultNormalizedEnvelopes = data.envelopes && data.envelopes.length > 0 ? data.envelopes : defaultEnvelopes;
+          const defaultNormalizedLockImage = data.lockImage || '';
 
           const loadedPolaroids = localPolaroids ? JSON.parse(localPolaroids) : defaultNormalizedPolaroids;
           const loadedEnvelopes = localEnvelopes ? JSON.parse(localEnvelopes) : defaultNormalizedEnvelopes;
+          const loadedLockImage = localLockImage || defaultNormalizedLockImage;
 
           setPolaroids(loadedPolaroids);
           setEnvelopes(loadedEnvelopes);
+          setLockImage(loadedLockImage);
           setIsLoading(false);
         })
         .catch(() => {
           const localEnvelopes = localStorage.getItem(ENVELOPE_STORAGE_KEY);
           const localPolaroids = localStorage.getItem(POLAROID_STORAGE_KEY);
+          const localLockImage = localStorage.getItem(LOCK_IMAGE_STORAGE_KEY);
 
           setPolaroids(localPolaroids ? JSON.parse(localPolaroids) : defaultPolaroids);
           setEnvelopes(localEnvelopes ? JSON.parse(localEnvelopes) : defaultEnvelopes);
+          setLockImage(localLockImage || '');
           setIsLoading(false);
         });
     }
   }, []);
 
-  function syncWithDatabase(updatedPolaroids, updatedEnvelopes) {
+  function syncWithDatabase(updatedPolaroids, updatedEnvelopes, updatedLockImage = lockImage) {
     const dbUrl = getFirebaseUrl();
     if (!dbUrl) return;
 
@@ -974,7 +1052,7 @@ export default function App() {
     fetch(dbUrl, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ polaroids: updatedPolaroids, envelopes: updatedEnvelopes })
+      body: JSON.stringify({ polaroids: updatedPolaroids, envelopes: updatedEnvelopes, lockImage: updatedLockImage })
     })
     .then((res) => {
       if (!res.ok) throw new Error('Database sync failed');
@@ -1012,6 +1090,8 @@ export default function App() {
         envelopes={envelopes}
         setPolaroids={setPolaroids}
         setEnvelopes={setEnvelopes}
+        lockImage={lockImage}
+        setLockImage={setLockImage}
         syncStatus={syncStatus}
         syncError={syncError}
         onSync={syncWithDatabase}
@@ -1028,6 +1108,6 @@ export default function App() {
       setEnvelopes={setEnvelopes}
     />
   ) : (
-    <LockScreen isUnlocking={isUnlocking} onUnlock={handleUnlock} />
+    <LockScreen isUnlocking={isUnlocking} onUnlock={handleUnlock} lockImage={lockImage} />
   );
 }

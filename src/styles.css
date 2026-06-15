@@ -1646,3 +1646,54 @@ textarea {
 .admin-export-tip.database-connected p {
   color: #1e3a8a;
 }
+
+/* Lock Screen Image Editor */
+.admin-lock-image-editor {
+  margin-top: 28px;
+  padding: 22px;
+  background: rgba(255, 250, 252, 0.74);
+  border: 1px solid #fbcfe8;
+  border-radius: 16px;
+}
+
+.admin-lock-image-upload-area {
+  margin-top: 12px;
+}
+
+.admin-lock-image-preview {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px;
+  background: #fffafb;
+  border: 1px solid #fbcfe8;
+  border-radius: 14px;
+}
+
+.admin-lock-image-preview img {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  border-radius: 12px;
+  border: 1px solid rgba(225, 29, 72, 0.14);
+  background: #fff1f5;
+  box-shadow: 0 8px 18px rgba(190, 18, 60, 0.1);
+}
+
+.remove-lock-image-btn {
+  padding: 10px 18px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #fb7185, #be123c);
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 6px 14px rgba(190, 18, 60, 0.2);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.remove-lock-image-btn:hover {
+  background: linear-gradient(135deg, #f43f5e, #9f1239);
+  box-shadow: 0 8px 18px rgba(190, 18, 60, 0.3);
+}
